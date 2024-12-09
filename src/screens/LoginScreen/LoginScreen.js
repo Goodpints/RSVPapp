@@ -1,38 +1,60 @@
- 
-import React, { useState } from 'react';
-import { View, TextInput, Button, Text } from 'react-native';
-import auth from '@react-native-firebase/auth';
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity } from "react-native";
+import { auth } from '../../firebase/config'; 
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const LoginScreen = ({ navigation }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
       await auth().signInWithEmailAndPassword(email, password);
-      navigation.navigate('Home'); // Navigate to Home on successful login
+      navigation.replace("Home"); // Navigate to Home on successful login
     } catch (error) {
-      console.error(error.message);
+      alert(error.message); // Show error to the user
     }
   };
 
   return (
-    <View>
+    <View style={styles.container}>
       <TextInput
         placeholder="Email"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text)}
+        style={styles.input}
       />
       <TextInput
         placeholder="Password"
-        secureTextEntry
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => setPassword(text)}
+        style={styles.input}
+        secureTextEntry
       />
       <Button title="Login" onPress={handleLogin} />
-      <Text onPress={() => navigation.navigate('Registration')}>
-        Don't have an account? Register here.
-      </Text>
+      <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+        <Text style={styles.link}>Don't have an account? Register here</Text>
+      </TouchableOpacity>
     </View>
   );
-}
+};
+
+export default LoginScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  input: {
+    backgroundColor: "#f5f5f5",
+    padding: 10,
+    marginVertical: 10,
+    borderRadius: 5,
+  },
+  link: {
+    color: "blue",
+    marginTop: 10,
+    textAlign: "center",
+  },
+});
