@@ -1,19 +1,28 @@
 import React from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
-import { auth } from '../../firebase/config';  // Correct path to config.js
+import { auth } from "../../firebase/config"; // Correct path to config.js
 
 const HomeScreen = ({ navigation }) => {
+  // Handle user logout
   const handleLogout = () => {
     auth()
       .signOut()
-      .then(() => navigation.replace("Login"))
+      .then(() => navigation.replace("Login")) // Navigate back to the Login screen
       .catch((error) => alert(error.message));
   };
 
   return (
     <View style={styles.container}>
-      <Text>Welcome to the Home Screen!</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <Text style={styles.title}>Welcome to the Home Screen!</Text>
+
+      {/* Navigate to Event List Screen */}
+      <Button
+        title="View Events"
+        onPress={() => navigation.navigate("EventList")} // Adjust to your EventListScreen route name
+      />
+
+      {/* Logout Button */}
+      <Button title="Logout" onPress={handleLogout} color="red" />
     </View>
   );
 };
@@ -25,5 +34,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
   },
 });

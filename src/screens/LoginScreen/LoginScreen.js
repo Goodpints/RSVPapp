@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TextInput, Button, TouchableOpacity } from "react-native";
-import { auth } from '../../firebase/config'; 
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../firebase/config"; // Adjust the path if needed
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -8,7 +9,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      await auth().signInWithEmailAndPassword(email, password);
+      await signInWithEmailAndPassword(auth, email, password);
       navigation.replace("Home"); // Navigate to Home on successful login
     } catch (error) {
       alert(error.message); // Show error to the user

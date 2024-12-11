@@ -7,10 +7,18 @@ const RegistrationScreen = ({ navigation }) => {
   const [password, setPassword] = useState("");
 
   const handleRegister = () => {
-    auth.createUserWithEmailAndPassword(email, password)
-      .then(() => navigation.replace("Home"))
+    auth
+      .createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        // Get user details
+        const user = userCredential.user;
+        console.log("Registered User:", user.email); // Logs the registered email
+        alert(`Welcome, ${user.email}!`);
+        navigation.replace("Home");
+      })
       .catch((error) => alert(error.message));
   };
+  
 
   return (
     <View style={styles.container}>
