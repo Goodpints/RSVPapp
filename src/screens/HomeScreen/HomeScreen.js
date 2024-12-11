@@ -1,12 +1,12 @@
 import React from "react";
 import { View, Text, Button, StyleSheet } from "react-native";
 import { auth } from "../../firebase/config"; // Correct path to config.js
+import { signOut } from "firebase/auth"; // Import signOut method
 
 const HomeScreen = ({ navigation }) => {
   // Handle user logout
   const handleLogout = () => {
-    auth()
-      .signOut()
+    signOut(auth) // Use signOut with auth instance
       .then(() => navigation.replace("Login")) // Navigate back to the Login screen
       .catch((error) => alert(error.message));
   };

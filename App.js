@@ -6,6 +6,7 @@ import RegistrationScreen from "./src/screens/RegistrationScreen/RegistrationScr
 import HomeScreen from "./src/screens/HomeScreen/HomeScreen";
 import EventListScreen from "./src/screens/EventListScreen/EventListScreen";
 import EventDetailScreen from "./src/screens/EventDetailScreen/EventDetailScreen";
+import AddEventScreen from "./src/screens/AddEventScreen/AddEventScreen";
 
 import { auth } from "./src/firebase/config"; // Import Firebase Auth
 
@@ -35,6 +36,7 @@ export default function App() {
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="EventList" component={EventListScreen} />
+            <Stack.Screen name="AddEvent" component={AddEventScreen} />
             <Stack.Screen name="EventDetails" component={EventDetailScreen} />
           </>
         )}

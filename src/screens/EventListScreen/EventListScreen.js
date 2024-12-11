@@ -1,70 +1,50 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Button } from "react-native";
+import { db } from "../../firebase/config"; // Ensure this is your Firebase config
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/config";
 
-const EventListScreen = () => {
+const EventListScreen = ({ navigation }) => {
   const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigation = useNavigation();
 
+  // Fetch events from Firestore
   useEffect(() => {
     const fetchEvents = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "events"));
-        const eventsList = querySnapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
-        setEvents(eventsList);
-      } catch (err) {
-        setError("Failed to load events");
-        console.error("Error fetching events:", err);
-      } finally {
-        setLoading(false);
-      }
+      const querySnapshot = await getDocs(collection(db, "events"));
+      const eventsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setEvents(eventsData);
     };
+
     fetchEvents();
   }, []);
 
-  const handleEventPress = (eventId) => {
-    navigation.navigate("EventDetails", { eventId }); // Pass eventId here
-  };
-
+  // Render each event item
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      style={styles.eventItem}
-      onPress={() => handleEventPress(item.id)} // Ensure item.id exists
+      style={styles.eventContainer}
+      onPress={() => navigation.navigate("EventDetails", { eventId: item.id })}
     >
       <Text style={styles.eventTitle}>{item.title}</Text>
-      <Text>{item.description}</Text>
+      <Text style={styles.eventDescription}>{item.description}</Text>
+      <Text style={styles.eventDate}>
+        {new Date(item.date.seconds * 1000).toLocaleString()}
+      </Text>
+      <Text style={styles.attendeesTitle}>Attendees:</Text>
+      {item.attendees && item.attendees.length > 0 ? (
+        item.attendees.map((attendee, index) => (
+          <View key={index} style={styles.attendeeContainer}>
+            <Text style={styles.attendeeInfo}>
+              {attendee.userId}: {attendee.status.charAt(0).toUpperCase() + attendee.status.slice(1)}
+            </Text>
+          </View>
+        ))
+      ) : (
+        <Text style={styles.noAttendees}>No attendees</Text>
+      )}
     </TouchableOpacity>
   );
-
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.container}>
@@ -78,32 +58,49 @@ const EventListScreen = () => {
           renderItem={renderItem}
         />
       )}
+      {/* Add Event Button */}
+      <TouchableOpacity
+        style={styles.addEventButton}
+        onPress={() => navigation.navigate("AddEvent")}
+      >
+        <Text style={styles.addEventButtonText}>Add Event</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
+  container: { padding: 20, flex: 1 },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
+  eventContainer: {
+    backgroundColor: "#f9f9f9",
+    padding: 15,
+    marginVertical: 10,
+    borderRadius: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 20,
+  eventTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 5 },
+  eventDescription: { fontSize: 14, color: "#555" },
+  eventDate: { fontSize: 12, color: "#888", marginTop: 5 },
+  attendeesTitle: { fontSize: 16, fontWeight: "bold", marginTop: 10 },
+  attendeeContainer: { marginLeft: 10 },
+  attendeeInfo: { fontSize: 14, color: "#444" },
+  noAttendees: { fontSize: 14, color: "#888", fontStyle: "italic" },
+  addEventButton: {
+    backgroundColor: "#4CAF50",
+    padding: 15,
+    marginTop: 20,
+    borderRadius: 8,
+    alignItems: "center",
   },
-  eventItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
-  },
-  eventTitle: {
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  errorText: {
-    color: "red",
+  addEventButtonText: {
+    color: "#fff",
     fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
