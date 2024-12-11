@@ -13,7 +13,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to the Home Screen!</Text>
+      <Text style={styles.title}>RSVP ME</Text>
 
       {/* Navigate to Event List Screen */}
       <Button

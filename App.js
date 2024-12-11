@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { auth } from "./src/firebase/config"; // Make sure the path is correct
+import LoginScreen from "./src/screens/LoginScreen/LoginScreen";
+import RegistrationScreen from "./src/screens/RegistrationScreen/RegistrationScreen";
+import HomeScreen from "./src/screens/HomeScreen/HomeScreen";
+import EventListScreen from "./src/screens/EventListScreen/EventListScreen";
+import EventDetailScreen from "./src/screens/EventDetailScreen/EventDetailScreen";
 
-import LoginScreen from './src/screens/LoginScreen/LoginScreen.js'
-import HomeScreen from './src/screens/HomeScreen/HomeScreen.js';
-import RegistrationScreen from './src/screens/RegistrationScreen/RegistrationScreen';
-import EventListScreen from './src/screens/EventListScreen/EventListScreen'; // Import Event List Screen
-import EventDetailScreen from './src/screens/EventDetailScreen/EventDetailScreen'; // Import Event Details Screen
+import { auth } from "./src/firebase/config"; // Import Firebase Auth
 
 const Stack = createStackNavigator();
 
 export default function App() {
   const [user, setUser] = useState(null);
 
+  // Listen to Firebase Auth state
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((authUser) => {
-      
-      setUser(authUser); // Update user state when logged in or logged out
+      setUser(authUser); // Set user state
     });
-    return unsubscribe;
+
+    return unsubscribe; // Cleanup the listener
   }, []);
 
   return (
