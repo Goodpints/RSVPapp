@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import firestore from "@react-native-firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/config";
 
 const EventListScreen = () => {
   const [events, setEvents] = useState([]);
@@ -12,28 +20,31 @@ const EventListScreen = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const eventsSnapshot = await firestore().collection("events").get();
-        const eventsList = eventsSnapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(collection(db, "events"));
+        const eventsList = querySnapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
         }));
         setEvents(eventsList);
-        setLoading(false);
       } catch (err) {
         setError("Failed to load events");
-        setLoading(false);
         console.error("Error fetching events:", err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchEvents();
   }, []);
 
   const handleEventPress = (eventId) => {
-    navigation.navigate("EventDetail", { eventId });
+    navigation.navigate("EventDetails", { eventId }); // Pass eventId here
   };
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.eventItem} onPress={() => handleEventPress(item.id)}>
+    <TouchableOpacity
+      style={styles.eventItem}
+      onPress={() => handleEventPress(item.id)} // Ensure item.id exists
+    >
       <Text style={styles.eventTitle}>{item.title}</Text>
       <Text>{item.description}</Text>
     </TouchableOpacity>

@@ -1,45 +1,39 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, Button, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { getAuth } from "firebase/auth";
-import firestore from "@react-native-firebase/firestore";
+import { View, Text, Button, StyleSheet } from "react-native";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/config";
 
 const EventDetailScreen = ({ route, navigation }) => {
-  const { eventId } = route.params;
+  const eventId = route?.params?.eventId; // Safely access eventId
   const [event, setEvent] = useState(null);
-  const [response, setResponse] = useState(null);
-  const currentUser = getAuth().currentUser;
 
   useEffect(() => {
+    if (!eventId) return;
+
     const fetchEvent = async () => {
-      const eventDoc = await firestore().collection("events").doc(eventId).get();
-      if (eventDoc.exists) {
-        setEvent(eventDoc.data());
+      try {
+        const docRef = doc(db, "events", eventId);
+        const eventDoc = await getDoc(docRef);
+        if (eventDoc.exists()) {
+          setEvent(eventDoc.data());
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching event:", error);
       }
     };
     fetchEvent();
   }, [eventId]);
 
-  const handleResponse = async (status) => {
-    if (!currentUser) {
-      Alert.alert("Error", "You need to be logged in to respond.");
-      return;
-    }
-
-    const userResponse = {
-      userId: currentUser.uid,
-      status: status,
-    };
-
-    try {
-      await firestore().collection("events").doc(eventId).update({
-        attendees: firestore.FieldValue.arrayUnion(userResponse),  // Add response to attendees array
-      });
-      setResponse(status);
-      Alert.alert("Success", `You responded with ${status}.`);
-    } catch (error) {
-      console.error("Error responding to event: ", error);
-    }
-  };
+  if (!eventId) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Event not found!</Text>
+        <Button title="Go Back" onPress={() => navigation.goBack()} />
+      </View>
+    );
+  }
 
   if (!event) {
     return (
@@ -54,21 +48,6 @@ const EventDetailScreen = ({ route, navigation }) => {
       <Text style={styles.title}>{event.title}</Text>
       <Text>{event.description}</Text>
       <Text>Date: {new Date(event.date.seconds * 1000).toDateString()}</Text>
-      
-      <Text style={styles.subtitle}>Your Response: {response || "Not Responded"}</Text>
-
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={() => handleResponse("Yes")}>
-          <Text style={styles.buttonText}>Yes</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handleResponse("No")}>
-          <Text style={styles.buttonText}>No</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => handleResponse("Maybe")}>
-          <Text style={styles.buttonText}>Maybe</Text>
-        </TouchableOpacity>
-      </View>
-
       <Button title="Back to Events" onPress={() => navigation.goBack()} />
     </View>
   );
@@ -84,24 +63,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
   },
-  subtitle: {
-    fontSize: 18,
-    marginVertical: 10,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginVertical: 20,
-  },
-  button: {
-    backgroundColor: "#4CAF50",
-    padding: 10,
-    borderRadius: 5,
-    width: "30%",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
+  errorText: {
+    color: "red",
     fontSize: 16,
   },
 });
