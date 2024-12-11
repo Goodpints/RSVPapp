@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Button } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, ScrollView, Platform, StyleSheet } from "react-native";
 import { db } from "../../firebase/config"; // Ensure this is your Firebase config
 import { collection, getDocs } from "firebase/firestore";
 
@@ -52,11 +52,17 @@ const EventListScreen = ({ navigation }) => {
       {events.length === 0 ? (
         <Text>No events available</Text>
       ) : (
-        <FlatList
-          data={events}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-        />
+        Platform.OS === "web" ? (
+          <ScrollView style={styles.scrollContainer}>
+            {events.map((item) => renderItem({ item }))}
+          </ScrollView>
+        ) : (
+          <FlatList
+            data={events}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+          />
+        )
       )}
       {/* Add Event Button */}
       <TouchableOpacity
@@ -101,6 +107,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  scrollContainer: {
+    maxHeight: "80%", // Limit height of ScrollView on web
   },
 });
 

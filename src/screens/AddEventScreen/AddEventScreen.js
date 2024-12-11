@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
+import { View, Text, TextInput, Button, StyleSheet, Alert, Platform } from "react-native";
 import { db } from "../../firebase/config";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
-import DatePicker from "react-datepicker"; // Importing react-datepicker
-import "react-datepicker/dist/react-datepicker.css"; // Importing styles for the date picker
+import DateTimePicker from "@react-native-community/datetimepicker"; // Native DateTimePicker for iOS/Android
+import ReactDateTimePicker from 'react-datetime-picker'; // Web-compatible DateTimePicker
 
 const AddEventScreen = ({ navigation }) => {
   const [title, setTitle] = useState("");
@@ -59,13 +59,23 @@ const AddEventScreen = ({ navigation }) => {
       />
 
       <View style={styles.pickerContainer}>
-        <Text>Select Date</Text>
-        <DatePicker
-          selected={date}
-          onChange={setDate} // Update the selected date
-          dateFormat="yyyy/MM/dd"
-          className="datepicker" // Optional styling class
-        />
+        <Text>Select Date and Time</Text>
+        
+        {/* Conditional rendering based on platform */}
+        {Platform.OS === "web" ? (
+          <ReactDateTimePicker
+            onChange={setDate} // Update the date when the user selects it
+            value={date} // The date to display in the picker
+            format="y-MM-dd h:mm a" // Customize the format as per your needs
+          />
+        ) : (
+          <DateTimePicker
+            onChange={(event, selectedDate) => setDate(selectedDate || date)} // Update the date when the user selects it
+            value={date} // The date to display in the picker
+            mode="datetime" // Show both date and time
+            display="default"
+          />
+        )}
       </View>
 
       <Button title="Create Event" onPress={handleCreateEvent} />

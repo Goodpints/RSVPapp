@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Picker, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { db } from "../../firebase/config"; // Ensure this is your Firebase config
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { Picker } from '@react-native-picker/picker'; // Corrected import
 
 const EventDetailScreen = ({ route }) => {
   const { eventId } = route.params;
   const [event, setEvent] = useState(null);
   const [attendees, setAttendees] = useState([]);
-  const [selectedStatus, setSelectedStatus] = useState("");
 
   useEffect(() => {
     const fetchEventDetails = async () => {
